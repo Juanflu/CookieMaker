@@ -1,0 +1,97 @@
+version: '3'
+
+networks:
+  TestServiceNetwork:
+    ipam:
+      config:
+        - subnet: 192.168.213.0/24
+
+services:
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5340:80"
+    networks: 
+      TestServiceNetwork:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    container_name: rabbitmq
+    hostname: "${BUS_HOST}"
+    networks: 
+      TestServiceNetwork:
+        ipv4_address: 192.168.213.10
+
+  CookieControlUI:
+    build: ./CookieControlUI
+    image: cookiecontrolui:latest
+    container_name: CookieControlUI
+    ports:
+      - "8080:3000"
+    networks: 
+      TestServiceNetwork:
+
+  UIApi:
+    environment: 
+      BUS_HOST: "${BUS_HOST}"
+    build: ./UIApi
+    image: uiapi:latest
+    container_name: UIApi
+    depends_on: 
+      - rabbitmq
+    ports:
+      - "8000:8000"
+    hostname: uiapi
+    networks: 
+      TestServiceNetwork:
+
+  RecipeManager:
+    build: ./RecipeManager
+    image: recipemanager:latest
+    container_name: RecipeManager
+    environment: 
+      BUS_HOST: "${BUS_HOST}"
+    depends_on: 
+      - rabbitmq
+    networks: 
+      TestServiceNetwork:
+
+  StockService:
+    build: ./StockService
+    image: stockservice:latest
+    container_name: StockService
+    environment: 
+      BUS_HOST: "${BUS_HOST}"
+    depends_on: 
+      - rabbitmq
+    networks: 
+      TestServiceNetwork:
+
+  AddSugarService:
+    environment: 
+      BUS_HOST: "${BUS_HOST}"
+    build: ./AddSugarService
+    image: addsugarservice:latest
+    container_name: AddSugarService
+    depends_on: 
+      - rabbitmq
+    networks: 
+      TestServiceNetwork:
+
+  AddFlourService:
+    environment: 
+      BUS_HOST: "${BUS_HOST}"
+    build: ./AddFlourService
+    image: addflourservice:latest
+    container_name: AddFlourService
+    depends_on: 
+      - rabbitmq
+    networks: 
+      TestServiceNetwork:

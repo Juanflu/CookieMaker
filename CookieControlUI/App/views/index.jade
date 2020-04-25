@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to cookie manager
+
+  div(id="input")
+    form(id="input_form", name="addCookies", method="post", action="/addCookies")
+      input(type="text", placeholder="# of cookies", name="numberOfCookies")
+      button(id="submit", name="submit", type="submit") submit
+
+  h3 cookie.id - cookie.progress
+
+  for cookie in cookies
+    h3 #{cookie.id} - #{cookie.progress}
